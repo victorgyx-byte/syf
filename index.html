@@ -139,21 +139,22 @@
     .import-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: -4px 0 18px;
+      gap: 8px;
+      margin: 6px 0 10px;
     }
 
     .import-button {
       display: grid;
-      min-height: 58px;
+      min-height: 42px;
       place-items: center;
       border: 1px solid rgba(255, 255, 255, .14);
-      border-radius: 20px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, .42);
       color: var(--ink);
       cursor: pointer;
-      font-size: .92rem;
-      font-weight: 780;
+      font-size: .8rem;
+      font-weight: 760;
+      padding: 6px 8px;
       transition: transform .2s ease, background .2s ease, border-color .2s ease;
     }
 
@@ -166,6 +167,32 @@
       border-color: rgba(255, 255, 255, .3);
       background: rgba(255, 224, 61, .55);
       transform: translateY(-2px);
+    }
+
+    #generateLoopsButton {
+      background: rgba(0, 213, 255, .8);
+      border-color: rgba(0, 213, 255, .95);
+      color: #0d1a22;
+      box-shadow: 0 10px 20px rgba(0, 213, 255, .28);
+    }
+
+    #generateLoopsButton:hover,
+    #generateLoopsButton:active {
+      background: rgba(0, 213, 255, .95);
+      border-color: rgba(0, 213, 255, 1);
+    }
+
+    #clearGeneratedLoops {
+      background: rgba(255, 79, 163, .76);
+      border-color: rgba(255, 79, 163, .95);
+      color: #2b1022;
+      box-shadow: 0 10px 20px rgba(255, 79, 163, .24);
+    }
+
+    #clearGeneratedLoops:hover,
+    #clearGeneratedLoops:active {
+      background: rgba(255, 79, 163, .9);
+      border-color: rgba(255, 79, 163, 1);
     }
 
     .import-row .import-button:nth-child(3),
@@ -215,8 +242,29 @@
     }
 
     .media-card.music-card {
-      min-height: 112px;
-      grid-template-columns: 82px 1fr;
+      min-height: 62px;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 16px;
+    }
+
+    .music-card .poster {
+      display: none;
+    }
+
+    .music-card .card-copy {
+      gap: 3px;
+    }
+
+    .music-card .card-copy strong {
+      font-size: .95rem;
+      line-height: 1.15;
+    }
+
+    .music-card .card-copy span {
+      font-size: .82rem;
+      line-height: 1.15;
     }
 
     .media-card:active {
@@ -262,12 +310,6 @@
       overflow: hidden;
       border-radius: 20px;
       background: var(--poster);
-    }
-
-    .music-card .poster {
-      min-width: 82px;
-      height: 82px;
-      border-radius: 18px;
     }
 
     .poster img,
@@ -367,6 +409,7 @@
       inset: 0;
       overflow: hidden;
       border-radius: inherit;
+      background: #f7f3ff;
     }
 
     .stage-media {
@@ -381,9 +424,19 @@
       opacity: .82;
     }
 
-    .stage-media img,
-    .stage-media video,
-    .stage-media object {
+    .stage-slot {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity .12s linear;
+    }
+
+    .stage-slot.active {
+      opacity: 1;
+    }
+
+    .stage-slot img,
+    .stage-slot video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -391,38 +444,7 @@
     }
 
     .art-layer {
-      position: absolute;
-      inset: 8%;
-      border-radius: 42% 58% 36% 64% / 56% 36% 64% 44%;
-      background: linear-gradient(135deg, rgba(0, 213, 255, .72), rgba(255, 224, 61, .55), rgba(255, 79, 163, .68));
-      filter: blur(.2px);
-      opacity: .68;
-      animation: breathe 8s ease-in-out infinite alternate;
-    }
-
-    .art-layer:nth-child(2) {
-      inset: 22% 18% 18% 36%;
-      background: linear-gradient(160deg, rgba(98, 103, 255, .75), rgba(84, 240, 107, .62), rgba(255, 255, 255, .34));
-      mix-blend-mode: screen;
-      animation-duration: 11s;
-      animation-delay: -3s;
-    }
-
-    .art-layer:nth-child(3) {
-      inset: 16% 44% 32% 14%;
-      background: linear-gradient(45deg, rgba(255, 79, 163, .76), rgba(255, 245, 106, .42));
-      mix-blend-mode: lighten;
-      animation-duration: 13s;
-      animation-delay: -7s;
-    }
-
-    @keyframes breathe {
-      from {
-        transform: translate3d(-4%, 2%, 0) rotate(-4deg) scale(.98);
-      }
-      to {
-        transform: translate3d(5%, -3%, 0) rotate(7deg) scale(1.08);
-      }
+      display: none;
     }
 
     .stage::after {
@@ -619,6 +641,27 @@
       touch-action: none;
     }
 
+    .timeline-hint {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+      padding: 10px 14px;
+      border: 1px solid rgba(33, 21, 39, .16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+      color: rgba(33, 21, 39, .72);
+      font-size: .84rem;
+      font-weight: 700;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .timeline-hint.is-hidden {
+      display: none;
+    }
+
     .timeline.is-panning,
     .timeline.is-pinching {
       cursor: grabbing;
@@ -772,6 +815,24 @@
       font-size: .7rem;
       font-weight: 740;
       font-variant-numeric: tabular-nums;
+    }
+
+    .clip-wave {
+      height: 12px;
+      margin-top: 4px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, .16);
+      overflow: hidden;
+    }
+
+    .clip-wave svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .clip-wave rect {
+      fill: rgba(10, 12, 14, .78);
     }
 
     .handle {
@@ -969,18 +1030,20 @@
       <div class="brand">
         <h1>Create<br>your jam</h1>
       </div>
-      <div class="import-row" aria-label="Import media">
-        <label class="import-button" for="loopUpload">Add loops</label>
-        <label class="import-button" for="musicUpload">Add music</label>
-        <a class="import-button" href="./generator.html">Generate loops</a>
+      <div class="import-row" aria-label="Generator actions">
+        <a class="import-button" id="generateLoopsButton" href="./generator.html">Generate loops</a>
         <button class="import-button" id="clearGeneratedLoops" type="button">Clear generated loops</button>
       </div>
-      <input class="file-input" id="loopUpload" type="file" accept="video/*,image/*" multiple>
-      <input class="file-input" id="musicUpload" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.ogg,.flac" multiple>
       <p class="section-label">Loops</p>
       <div class="cards" id="loopCards" aria-label="Loop library"></div>
       <p class="section-label">Music</p>
       <div class="cards" id="musicCards" aria-label="Music library"></div>
+      <div class="import-row" aria-label="Import media">
+        <label class="import-button" for="loopUpload">Add loops</label>
+        <label class="import-button" for="musicUpload">Add music</label>
+      </div>
+      <input class="file-input" id="loopUpload" type="file" accept="video/*,image/*" multiple>
+      <input class="file-input" id="musicUpload" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.ogg,.flac" multiple>
     </aside>
 
     <div class="monitor-stack">
@@ -1022,6 +1085,7 @@
           <div class="lane" data-lane="0"><span class="lane-label">Loop</span></div>
           <div class="lane" data-lane="1"><span class="lane-label">Music</span></div>
         </div>
+        <div class="timeline-hint" id="timelineHint">Drag loops or music into the timeline</div>
         <div class="snap-line" id="snapLine"></div>
         <div class="playhead" id="playhead"></div>
       </div>
@@ -1035,7 +1099,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlnc2d6amd4cGl6b2xieXJ2aW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzODg3MTUsImV4cCI6MjA5Mzk2NDcxNX0.OEVnlO46Xtked0RG81dEfouXpd9A0mx5dkcwKIFLBfk";
     const SUPABASE_BUCKET = "media-assets";
     const SUPABASE_TABLE = "media_library";
-    const ARRANGEMENT_STORAGE_KEY = "cyj_arrangement_v1";
+    const ARRANGEMENT_STORAGE_KEY = "cyj_arrangement_v2";
     let supabaseClient = null;
     let saveTimer = null;
 
@@ -1206,20 +1270,12 @@
       { title: "Apple Fury", note: "Squash-stretch 3D rush", duration: 2.9, kind: "visual", fileType: "svg", src: appleFurySrc, colors: ["#00d5ff", "#ff4fa3"], poster: "linear-gradient(135deg, #00d5ff, #ff4fa3 52%, #fff56a)" },
       { title: "Apple Slice Clone", note: "Sliced and duplicated loop", duration: 4.2, kind: "visual", fileType: "svg", src: appleSliceSrc, colors: ["#ffe03d", "#6267ff"], poster: "linear-gradient(135deg, #ffe03d, #6267ff 48%, #54f06b)" },
       { title: "Jumping Apple", note: "Line drawing bounce loop", duration: 3.6, kind: "visual", fileType: "svg", src: appleLoopSrc, colors: ["#ff4fa3", "#54f06b"], poster: "linear-gradient(135deg, #fff56a, #ff4fa3 50%, #00d5ff)" },
-      { title: "Candy Flash", note: "Bubblegum motion burst", duration: 7.5, kind: "visual", colors: ["#ff4fa3", "#ffe03d"], poster: "linear-gradient(135deg, #ff4fa3, #ffe03d 55%, #00d5ff)" },
-      { title: "Sticker Pop", note: "Cutout color bounce", duration: 5.25, kind: "visual", colors: ["#00d5ff", "#54f06b"], poster: "linear-gradient(135deg, #00d5ff, #54f06b 48%, #fff56a)" },
-      { title: "Neon Soda", note: "Fizzy shape pulse", duration: 6.75, kind: "visual", colors: ["#6267ff", "#ff4fa3"], poster: "linear-gradient(135deg, #6267ff, #ff4fa3 52%, #ffe03d)" },
-      { title: "Lemon Beat", note: "Sunny comic shimmer", duration: 4.5, kind: "visual", colors: ["#ffe03d", "#00d5ff"], poster: "linear-gradient(135deg, #ffe03d, #00d5ff 52%, #ff4fa3)" },
-      { title: "Mint Smash", note: "Playful poster grain", duration: 8, kind: "visual", colors: ["#54f06b", "#6267ff"], poster: "linear-gradient(135deg, #54f06b, #6267ff 50%, #ff4fa3)" },
       { title: "Rising Theme", note: "30s melody tension arc", duration: 30, kind: "audio", fileType: "synth", pattern: "rising", colors: ["#6267ff", "#54f06b"], poster: "linear-gradient(135deg, #6267ff, #54f06b 50%, #ffe03d)" },
       { title: "Action Beat", note: "30s heavy action drums", duration: 30, kind: "audio", fileType: "synth", pattern: "action", colors: ["#211527", "#ff4fa3"], poster: "linear-gradient(135deg, #211527, #ff4fa3 52%, #ffe03d)" }
     ];
 
     const state = {
-      clips: [
-        { id: "c1", title: "Candy Flash", kind: "visual", lane: 0, start: 0, duration: 7.5, colors: ["#ff4fa3", "#ffe03d"] },
-        { id: "c2", title: "Sticker Pop", kind: "visual", lane: 0, start: 7.5, duration: 5.25, colors: ["#00d5ff", "#54f06b"] }
-      ],
+      clips: [],
       seconds: 0,
       zoom: 1,
       pan: 0,
@@ -1230,6 +1286,7 @@
       lastFrame: 0,
       currentStageId: null,
       currentAudioId: null,
+      stageSlot: 0,
       synth: {
         activeId: null,
         ctx: null,
@@ -1244,6 +1301,7 @@
     const timeline = document.getElementById("timeline");
     const tracks = document.getElementById("tracks");
     const timeRuler = document.getElementById("timeRuler");
+    const timelineHint = document.getElementById("timelineHint");
     const playhead = document.getElementById("playhead");
     const snapLine = document.getElementById("snapLine");
     const play = document.getElementById("play");
@@ -1259,6 +1317,9 @@
     const audioPlayer = new Audio();
     const basePx = 74;
     const snapSeconds = .5;
+    const waveformCache = new Map();
+    const previewImageCache = new Map();
+    const previewPending = new Set();
 
     function pxPerSecond() {
       return basePx * state.zoom;
@@ -1318,6 +1379,17 @@
       return state.clips
         .filter((clip) => clip.kind !== "audio" && clip.id !== id)
         .sort((a, b) => a.start - b.start);
+    }
+
+    function normalizeAudioTrack() {
+      const audios = state.clips.filter((clip) => clip.kind === "audio");
+      if (audios.length === 0) return;
+      const keep = audios[audios.length - 1];
+      keep.lane = 1;
+      keep.start = 0;
+      if (audios.length > 1) {
+        state.clips = state.clips.filter((clip) => clip.kind !== "audio" || clip.id === keep.id);
+      }
     }
 
     function neighborsForClip(clip) {
@@ -1400,6 +1472,126 @@
       return `linear-gradient(135deg, #fff56a, ${colors[0]} 48%, ${colors[1]})`;
     }
 
+    function synthPeaks(pattern, points = 48) {
+      const peaks = [];
+      for (let i = 0; i < points; i++) {
+        const t = i / points;
+        if (pattern === "action") {
+          const pulse = Math.sin(t * Math.PI * 16) * .35 + .55;
+          const kick = i % 6 === 0 ? .95 : .4;
+          peaks.push(Math.max(.14, Math.min(1, pulse * kick)));
+        } else {
+          const swell = t < .72 ? .25 + t * .9 : Math.max(.2, 1 - (t - .72) * 2.5);
+          const shimmer = .08 + Math.abs(Math.sin(t * Math.PI * 10)) * .2;
+          peaks.push(Math.max(.12, Math.min(1, swell * .8 + shimmer)));
+        }
+      }
+      return peaks;
+    }
+
+    function peaksToPath(peaks, width = 240, height = 18) {
+      if (!peaks?.length) return "";
+      const mid = height / 2;
+      const step = width / Math.max(1, peaks.length - 1);
+      const top = peaks.map((v, i) => `${(i * step).toFixed(2)},${(mid - (v * mid * .9)).toFixed(2)}`).join(" ");
+      const bottom = peaks.map((v, i) => `${(i * step).toFixed(2)},${(mid + (v * mid * .9)).toFixed(2)}`).join(" ");
+      return `M ${top} M ${bottom}`;
+    }
+
+    function peaksToBars(peaks, width = 180, height = 12) {
+      if (!peaks?.length) return "";
+      const step = width / peaks.length;
+      const barWidth = Math.max(.8, step - .6);
+      return peaks.map((v, i) => {
+        const h = Math.max(1.4, Math.min(height, v * height));
+        const y = (height - h) / 2;
+        const x = i * step + (step - barWidth) / 2;
+        return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${h.toFixed(2)}" rx=".8" ry=".8"></rect>`;
+      }).join("");
+    }
+
+    async function decodeWavePeaks(src, points = 56) {
+      if (!src) return [];
+      const cached = waveformCache.get(src);
+      if (cached) return cached;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return [];
+        const ctx = state.synth?.ctx || new AudioCtx();
+        const response = await fetch(src);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+        const channel = audioBuffer.getChannelData(0);
+        const block = Math.max(1, Math.floor(channel.length / points));
+        const peaks = new Array(points).fill(.08).map((_, i) => {
+          let max = 0;
+          const start = i * block;
+          const end = Math.min(channel.length, start + block);
+          for (let j = start; j < end; j++) {
+            const n = Math.abs(channel[j]);
+            if (n > max) max = n;
+          }
+          return Math.max(.08, Math.min(1, max * 1.75));
+        });
+        waveformCache.set(src, peaks);
+        return peaks;
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function queueWaveformLoad(clip) {
+      if (!clip?.src || clip.pattern || waveformCache.has(clip.src)) return;
+      decodeWavePeaks(clip.src).then((peaks) => {
+        if (!peaks.length) return;
+        renderClips();
+      });
+    }
+
+    function rasterizeSvgToJpeg(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 320;
+          canvas.height = 180;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", .84));
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function queueStaticPreview(item) {
+      if (!item?.src || item.fileType !== "svg") return;
+      if (previewImageCache.has(item.src) || previewPending.has(item.src)) return;
+      previewPending.add(item.src);
+      rasterizeSvgToJpeg(item.src)
+        .then((jpg) => {
+          previewImageCache.set(item.src, jpg);
+          renderCards();
+        })
+        .catch(() => {})
+        .finally(() => {
+          previewPending.delete(item.src);
+        });
+    }
+
+    function getStaticCardPreview(item) {
+      if (!item || item.kind === "audio") return "";
+      if (item.fileType === "svg") {
+        const cached = previewImageCache.get(item.src);
+        if (!cached) queueStaticPreview(item);
+        return cached || "";
+      }
+      if (item.fileType === "image") return item.src || "";
+      return "";
+    }
+
     function loadGeneratedLoops() {
       let generated = [];
       try {
@@ -1461,6 +1653,7 @@
           duration: Math.max(1, Number(clip.duration)),
           colors: Array.isArray(clip.colors) && clip.colors.length >= 2 ? clip.colors.slice(0, 2) : colorPair(idx)
         }));
+      normalizeAudioTrack();
       state.seconds = Math.max(0, Number(saved.seconds) || 0);
       state.zoom = clamp(Number(saved.zoom) || 1, .55, 2.6);
       state.pan = Number(saved.pan) || 0;
@@ -1478,18 +1671,16 @@
       musicCards.innerHTML = "";
       library.forEach((item, index) => {
         const target = item.kind === "audio" ? musicCards : loopCards;
+        const isMusic = item.kind === "audio";
         const card = document.createElement("article");
-        card.className = `media-card ${item.kind === "audio" ? "music-card" : ""}`;
+        card.className = `media-card ${isMusic ? "music-card" : ""}`;
         card.style.setProperty("--poster", item.poster);
         card.dataset.index = index;
-        const mediaPreview = item.src && item.fileType === "image"
-          ? `<img src="${item.src}" alt="">`
-          : item.src && item.fileType === "video"
-            ? `<video src="${item.src}" muted loop playsinline></video>`
-            : "";
-        const kindLabel = item.kind === "audio" ? "music" : "loop";
+        const staticPreview = getStaticCardPreview(item);
+        const mediaPreview = staticPreview ? `<img src="${staticPreview}" alt="">` : "";
+        const kindLabel = isMusic ? "music" : "loop";
         card.innerHTML = `
-          <div class="poster ${mediaPreview ? "has-media" : ""}" aria-hidden="true">${mediaPreview}</div>
+          ${isMusic ? "" : `<div class="poster ${mediaPreview ? "has-media" : ""}" aria-hidden="true">${mediaPreview}</div>`}
           <div class="card-copy">
             <strong>${escapeHtml(item.title)}</strong>
             <span>${escapeHtml(item.note)}</span>
@@ -1497,11 +1688,6 @@
           </div>
           ${item.generatedTag ? `<button class="delete-generated" type="button" data-delete-generated="${escapeHtml(item.src)}" aria-label="Delete generated loop">×</button>` : ""}
         `;
-        const previewVideo = card.querySelector("video");
-        if (previewVideo) {
-          card.addEventListener("pointerenter", () => previewVideo.play().catch(() => {}));
-          card.addEventListener("pointerleave", () => previewVideo.pause());
-        }
         card.addEventListener("pointerdown", onCardPointerDown);
         const deleteGeneratedButton = card.querySelector(".delete-generated");
         if (deleteGeneratedButton) {
@@ -1538,9 +1724,15 @@
     }
 
     function renderClips() {
+      timelineHint?.classList.toggle("is-hidden", state.clips.length > 0);
       tracks.querySelectorAll(".clip").forEach((clip) => clip.remove());
       state.clips.forEach((clip) => {
         const lane = tracks.querySelector(`[data-lane="${clip.lane}"]`);
+        let peaks = clip.kind === "audio"
+          ? (clip.pattern ? synthPeaks(clip.pattern) : (waveformCache.get(clip.src) || []))
+          : [];
+        if (clip.kind === "audio" && peaks.length === 0) peaks = synthPeaks("action", 40);
+        const waveBars = peaksToBars(peaks, 180, 12);
         const el = document.createElement("div");
         el.className = "clip";
         el.dataset.id = clip.id;
@@ -1549,18 +1741,20 @@
         el.style.setProperty("--clip-a", clip.colors[0]);
         el.style.setProperty("--clip-b", clip.colors[1]);
         el.innerHTML = `
-          <div class="handle left" data-handle="left"></div>
+          ${clip.kind === "audio" ? `<div class="handle left is-locked" aria-hidden="true"></div>` : `<div class="handle left" data-handle="left"></div>`}
           <div class="clip-content">
             <strong>${escapeHtml(clip.title)}</strong>
+            ${clip.kind === "audio" ? `<div class="clip-wave"><svg viewBox="0 0 180 12" preserveAspectRatio="none" aria-hidden="true">${waveBars}</svg></div>` : ""}
             <small>${clip.duration.toFixed(2)}s</small>
           </div>
           <button class="delete-clip" type="button" data-delete="${clip.id}" aria-label="Delete ${escapeHtml(clip.title)}">×</button>
-          <div class="handle right" data-handle="right"></div>
+          ${clip.kind === "audio" ? `<div class="handle right is-locked" aria-hidden="true"></div>` : `<div class="handle right" data-handle="right"></div>`}
         `;
         el.addEventListener("pointerdown", onClipPointerDown);
         el.querySelector(".delete-clip").addEventListener("pointerdown", (event) => event.stopPropagation());
         el.querySelector(".delete-clip").addEventListener("click", deleteClip);
         lane.appendChild(el);
+        if (clip.kind === "audio" && !clip.pattern && clip.src && !waveformCache.has(clip.src)) queueWaveformLoad(clip);
       });
       updatePlayhead();
     }
@@ -1604,6 +1798,9 @@
     }
 
     function updateStageMedia() {
+      if (!stageMedia.querySelector(".stage-slot")) {
+        stageMedia.innerHTML = `<div class="stage-slot active" data-slot="0"></div><div class="stage-slot" data-slot="1"></div>`;
+      }
       const activeVisual = state.clips
         .filter((clip) => clip.kind !== "audio" && clip.src && state.seconds >= clip.start && state.seconds <= clip.start + clip.duration)
         .sort((a, b) => b.lane - a.lane)[0];
@@ -1614,23 +1811,30 @@
       }
       if (state.currentStageId !== activeVisual.id) {
         state.currentStageId = activeVisual.id;
-        if (activeVisual.fileType === "svg") {
-          stageMedia.innerHTML = `<object type="image/svg+xml" data="${activeVisual.src}" aria-hidden="true"></object>`;
-          stageMedia.querySelector("object").addEventListener("load", () => setStageSvgPlayback(state.playing), { once: true });
+        const slots = stageMedia.querySelectorAll(".stage-slot");
+        const nextSlot = state.stageSlot === 0 ? 1 : 0;
+        const target = slots[nextSlot];
+        const swapToTarget = () => {
+          slots[state.stageSlot].classList.remove("active");
+          target.classList.add("active");
+          state.stageSlot = nextSlot;
+        };
+        if (activeVisual.fileType === "video") {
+          target.innerHTML = `<video src="${activeVisual.src}" muted loop playsinline preload="auto"></video>`;
+          target.querySelector("video").addEventListener("loadeddata", swapToTarget, { once: true });
         } else {
-          stageMedia.innerHTML = activeVisual.fileType === "image"
-            ? `<img src="${activeVisual.src}" alt="">`
-            : `<video src="${activeVisual.src}" muted loop playsinline></video>`;
+          target.innerHTML = `<img src="${activeVisual.src}" alt="">`;
+          target.querySelector("img").addEventListener("load", swapToTarget, { once: true });
         }
       }
-      const video = stageMedia.querySelector("video");
+      const activeSlot = stageMedia.querySelector(".stage-slot.active");
+      const video = activeSlot?.querySelector("video");
       if (video) {
         const relative = Math.max(0, state.seconds - activeVisual.start);
         if (Math.abs(video.currentTime - relative) > .25) video.currentTime = relative % Math.max(.1, activeVisual.duration);
         if (state.playing) video.play().catch(() => {});
         else video.pause();
       }
-      setStageSvgPlayback(state.playing);
       stageMedia.classList.add("is-visible");
     }
 
@@ -1683,6 +1887,17 @@
       source.start(time);
     }
 
+    function playEnsembleChord(time, freqs, dur, gain = .1, family = "strings") {
+      const voicing = family === "brass"
+        ? [{ type: "sawtooth", detune: -4, g: 1 }, { type: "square", detune: 3, g: .75 }]
+        : [{ type: "triangle", detune: -6, g: 1 }, { type: "sine", detune: 5, g: .65 }];
+      freqs.forEach((freq) => {
+        voicing.forEach((voice) => {
+          playTone(time, freq, dur, gain * voice.g / freqs.length, voice.type);
+        });
+      });
+    }
+
     function scheduleSynthClip(clip, relative) {
       const synth = getSynth();
       if (synth.ctx.state === "suspended") synth.ctx.resume();
@@ -1695,11 +1910,22 @@
         synth.scheduled.clear();
       }
       synth.lastRelative = relative;
-      const lookAhead = .35;
-      const step = clip.pattern === "action" ? .227 : .3125;
+      const lookAhead = .45;
+      const step = clip.pattern === "action" ? .25 : .25;
       const startStep = Math.floor(relative / step);
       const endStep = Math.ceil((relative + lookAhead) / step);
-      const melody = [261.63, 329.63, 392, 523.25, 493.88, 392, 440, 523.25];
+      const risingLead = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25];
+      const actionLead = [220, 246.94, 293.66, 329.63, 293.66, 246.94, 392, 440];
+      const chordMap = {
+        C: [130.81, 164.81, 196],
+        Dm: [146.83, 174.61, 220],
+        Em: [164.81, 196, 246.94],
+        F: [174.61, 220, 261.63],
+        G: [196, 246.94, 293.66],
+        Am: [220, 261.63, 329.63]
+      };
+      const risingProg = ["Am", "F", "C", "G", "Am", "F", "Dm", "G"];
+      const actionProg = ["Am", "G", "F", "G", "Am", "Em", "F", "G"];
       for (let i = startStep; i <= endStep; i++) {
         const eventTime = i * step;
         if (eventTime < 0 || eventTime > clip.duration) continue;
@@ -1707,18 +1933,22 @@
         if (synth.scheduled.has(key)) continue;
         synth.scheduled.add(key);
         const when = synth.ctx.currentTime + Math.max(0, eventTime - relative);
-        if (clip.pattern === "action") {
-          if (i % 4 === 0) playTone(when, 54, .18, .42, "sine");
-          if (i % 8 === 4) playNoise(when, .11, .22);
-          if (i % 2 === 1) playNoise(when, .035, .055);
-          if (i % 8 === 6) playTone(when, 82, .16, .18, "square");
-        } else {
-          const tension = eventTime < 7 ? eventTime / 7 * .45 : eventTime < 22 ? .45 + (eventTime - 7) / 15 * .55 : Math.max(0, 1 - (eventTime - 22) / 8);
-          if (i % 8 === 0) playTone(when, [65.41, 73.42, 82.41, 98][Math.floor(i / 8) % 4], .9, .18 + tension * .15, "sine");
-          if (eventTime > 4 && i % 2 === 0) playTone(when, melody[(i + Math.floor(i / 8)) % melody.length], .22, .07 + tension * .08, "triangle");
-          if (eventTime > 8 && eventTime < 25 && i % 2 === 1) playNoise(when, .035, .035 + tension * .04);
-          if (eventTime > 6 && i % 8 === 4) playNoise(when, .1, .12 + tension * .08);
+        const ramp = clip.pattern === "action"
+          ? (eventTime < 20 ? .65 + eventTime / 20 * .35 : Math.max(.42, 1 - (eventTime - 20) / 10 * .58))
+          : (eventTime < 8 ? .45 + eventTime / 8 * .35 : eventTime < 22 ? .8 + (eventTime - 8) / 14 * .2 : Math.max(.4, 1 - (eventTime - 22) / 8 * .6));
+        if (i % 8 === 0) {
+          const prog = clip.pattern === "action" ? actionProg : risingProg;
+          const chordName = prog[Math.floor(i / 8) % prog.length];
+          const chord = chordMap[chordName] || chordMap.C;
+          playEnsembleChord(when, chord, .92, .2 * ramp, "strings");
+          playEnsembleChord(when + .02, chord.map((f) => f * 2), .5, .12 * ramp, "brass");
+          playTone(when, chord[0] / 2, .78, .18 * ramp, "sine");
         }
+        const lead = clip.pattern === "action" ? actionLead : risingLead;
+        if (i % 2 === 0) playTone(when, lead[(i + Math.floor(i / 8)) % lead.length], .22, .08 * ramp, clip.pattern === "action" ? "square" : "triangle");
+        if (i % 4 === 2) playTone(when, lead[(i + 3) % lead.length] * 2, .16, .05 * ramp, "sine");
+        if (i % 4 === 0) playNoise(when, .06, (.04 + .02 * ramp) * (clip.pattern === "action" ? 1.6 : 1));
+        if (i % 8 === 4) playNoise(when, .12, (.08 + .04 * ramp) * (clip.pattern === "action" ? 1.7 : 1.1));
       }
     }
 
@@ -1750,11 +1980,7 @@
     }
 
     function setStageSvgPlayback(playing) {
-      const object = stageMedia.querySelector("object");
-      const svg = object?.contentDocument?.querySelector("svg");
-      if (!svg) return;
-      if (playing) svg.unpauseAnimations?.();
-      else svg.pauseAnimations?.();
+      return;
     }
 
     function showSnap(clientX, visible) {
@@ -1804,7 +2030,10 @@
       const over = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
       if (over) {
         const preferredStart = snap(xToSeconds(event.clientX));
-        const start = item.kind === "audio" ? preferredStart : findAvailableLoopStart(preferredStart, item.duration);
+        const start = item.kind === "audio" ? 0 : findAvailableLoopStart(preferredStart, item.duration);
+        if (item.kind === "audio") {
+          state.clips = state.clips.filter((clip) => clip.kind !== "audio");
+        }
         state.clips.push({
           id: `c${Date.now()}`,
           title: item.title,
@@ -1818,6 +2047,7 @@
           pattern: item.pattern,
           generatedTag: !!item.generatedTag
         });
+        normalizeAudioTrack();
         state.seconds = start;
         pulse(stage);
         applyTimelineVars();
@@ -1854,6 +2084,7 @@
       event.stopPropagation();
       const el = event.currentTarget;
       const clip = state.clips.find((item) => item.id === el.dataset.id);
+      if (!clip || clip.kind === "audio") return;
       const handle = event.target.dataset.handle || "move";
       el.setPointerCapture(event.pointerId);
       el.classList.add(handle === "move" ? "is-dragging" : "is-resizing");
