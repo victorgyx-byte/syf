@@ -31,13 +31,19 @@
     .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 10px; }
     .swatch { min-height: 30px; border-radius: 999px; border: 2px solid rgba(33,21,39,.2); }
     .swatch.active { outline: 3px solid rgba(0,213,255,.45); }
+    .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .tool-btn { min-height: 34px; border-radius: 12px; border: 1px solid rgba(33,21,39,.2); background: rgba(255,255,255,.72); font-weight: 700; }
+    .tool-btn.active { outline: 3px solid rgba(0,213,255,.45); }
     .note { margin: 0; font-size: .92rem; opacity: .8; }
-    .workspace { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr); gap: 14px; align-items: start; }
-    .col { display: grid; gap: 14px; align-content: start; }
-    @media (max-width: 920px) {
+    .workspace { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+    .col { display: grid; gap: 14px; align-content: start; min-width: 0; }
+    @media (max-width: 980px) {
       .workspace { grid-template-columns: 1fr; }
     }
-    @media (max-width: 760px) { .row, .presets { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      .row, .presets { grid-template-columns: 1fr; }
+      .swatches { grid-template-columns: repeat(4, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -58,28 +64,14 @@
         </section>
 
         <section class="panel">
-          <div class="presets">
-            <button class="preset active" data-preset="spin">Spin</button>
-            <button class="preset" data-preset="rain">Rain</button>
-            <button class="preset" data-preset="bounce">Bounce</button>
-            <button class="preset" data-preset="smash">Smash</button>
-            <button class="preset" data-preset="slingshot">Slingshot</button>
-            <button class="preset" data-preset="orbit">Orbit</button>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="row">
-            <button class="btn primary" id="saveLoop">Add to Arrange</button>
-            <a class="btn" href="./index.html">Back to Arrange</a>
-          </div>
-        </section>
-      </div>
-
-      <div class="col">
-        <section class="panel">
+          <h3 style="margin:0 0 10px;">Draw your own fruit directly</h3>
           <div class="preview" style="padding:0;">
             <canvas class="draw-canvas" id="drawCanvas" width="960" height="540" aria-label="Draw your fruit"></canvas>
+          </div>
+          <div class="tools" aria-label="Drawing tools">
+            <button class="tool-btn active" id="toolPencil" type="button">Pencil</button>
+            <button class="tool-btn" id="toolFill" type="button">Fill</button>
+            <button class="tool-btn" id="toolEraser" type="button">Eraser</button>
           </div>
           <div class="swatches" id="swatches" aria-label="Drawing colors">
             <button class="swatch active" data-color="#211527" style="background:#211527"></button>
@@ -95,12 +87,33 @@
             <button class="btn" id="clearDrawing" type="button">Clear drawing</button>
             <button class="btn" id="useDrawing" type="button">Use drawing</button>
           </div>
-          <p class="note">Or draw your own fruit directly.</p>
         </section>
 
         <section class="panel">
+          <h3 style="margin:0 0 10px;">Fruit actions</h3>
+          <div class="presets">
+            <button class="preset active" data-preset="spin">Spin</button>
+            <button class="preset" data-preset="rain">Rain</button>
+            <button class="preset" data-preset="bounce">Bounce</button>
+            <button class="preset" data-preset="smash">Smash</button>
+            <button class="preset" data-preset="slingshot">Slingshot</button>
+            <button class="preset" data-preset="orbit">Orbit</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="col">
+        <section class="panel">
+          <h3 style="margin:0 0 10px;">Generated preview/status</h3>
           <div class="preview" id="preview"></div>
           <p class="note" id="status">Upload an image to auto-detect and cut out the fruit.</p>
+        </section>
+
+        <section class="panel">
+          <div class="row">
+            <button class="btn primary" id="saveLoop">Add to Arrange</button>
+            <a class="btn" href="./index.html">Back to Arrange</a>
+          </div>
         </section>
       </div>
     </div>
@@ -114,6 +127,11 @@
     const saveLoop = document.getElementById("saveLoop");
     const drawCanvas = document.getElementById("drawCanvas");
     const swatches = [...document.querySelectorAll(".swatch")];
+    const toolButtons = {
+      pencil: document.getElementById("toolPencil"),
+      fill: document.getElementById("toolFill"),
+      eraser: document.getElementById("toolEraser")
+    };
     const clearDrawing = document.getElementById("clearDrawing");
     const useDrawing = document.getElementById("useDrawing");
     const presets = [...document.querySelectorAll(".preset")];
@@ -123,20 +141,34 @@
     let selectedPreset = "spin";
     let generatedSrc = "";
     let drawing = false;
+    let drawTool = "pencil";
+    let drawColor = "#211527";
 
     const drawCtx = drawCanvas.getContext("2d");
     drawCtx.fillStyle = "#ffffff";
     drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawCtx.lineCap = "round";
     drawCtx.lineJoin = "round";
-    drawCtx.strokeStyle = "#211527";
+    drawCtx.strokeStyle = drawColor;
     drawCtx.lineWidth = 8;
+
+    function setTool(nextTool) {
+      drawTool = nextTool;
+      Object.entries(toolButtons).forEach(([name, btn]) => {
+        btn.classList.toggle("active", name === nextTool);
+      });
+    }
+
+    toolButtons.pencil.addEventListener("click", () => setTool("pencil"));
+    toolButtons.fill.addEventListener("click", () => setTool("fill"));
+    toolButtons.eraser.addEventListener("click", () => setTool("eraser"));
 
     swatches.forEach((btn) => {
       btn.addEventListener("click", () => {
         swatches.forEach((s) => s.classList.remove("active"));
         btn.classList.add("active");
-        drawCtx.strokeStyle = btn.dataset.color;
+        drawColor = btn.dataset.color;
+        if (drawTool === "pencil") drawCtx.strokeStyle = drawColor;
       });
     });
 
@@ -151,8 +183,14 @@
     }
 
     drawCanvas.addEventListener("pointerdown", (event) => {
-      drawing = true;
       const p = canvasPoint(event);
+      if (drawTool === "fill") {
+        drawCtx.fillStyle = drawColor;
+        drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+        return;
+      }
+      drawing = true;
+      drawCtx.strokeStyle = drawTool === "eraser" ? "#ffffff" : drawColor;
       drawCtx.beginPath();
       drawCtx.moveTo(p.x, p.y);
       drawCanvas.setPointerCapture(event.pointerId);
