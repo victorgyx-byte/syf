@@ -14,7 +14,7 @@
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; background: linear-gradient(135deg, #fff56a 0%, #ff8bd2 42%, #72f0ff 100%); color: var(--ink); }
-    .app { max-width: 980px; margin: 0 auto; padding: 18px; display: grid; gap: 14px; }
+    .app { max-width: 1180px; margin: 0 auto; padding: 18px; display: grid; gap: 14px; }
     .panel { border: 1px solid var(--line); border-radius: 22px; background: var(--glass); backdrop-filter: blur(16px); box-shadow: var(--shadow); padding: 16px; }
     h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.8rem); line-height: .95; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -32,6 +32,11 @@
     .swatch { min-height: 30px; border-radius: 999px; border: 2px solid rgba(33,21,39,.2); }
     .swatch.active { outline: 3px solid rgba(0,213,255,.45); }
     .note { margin: 0; font-size: .92rem; opacity: .8; }
+    .workspace { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr); gap: 14px; align-items: start; }
+    .col { display: grid; gap: 14px; align-content: start; }
+    @media (max-width: 920px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
     @media (max-width: 760px) { .row, .presets { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -42,57 +47,63 @@
       <p class="note">Upload a fruit drawing, auto-cut background, pick a motion style, and send it into Arrange.</p>
     </section>
 
-    <section class="panel">
-      <div class="row">
-        <input class="input" id="loopTitle" value="My Fruit Loop" aria-label="Loop title">
-        <label class="btn" for="photoInput">Upload fruit drawing</label>
-      </div>
-      <input id="photoInput" type="file" accept="image/*" style="display:none">
-    </section>
+    <div class="workspace">
+      <div class="col">
+        <section class="panel">
+          <div class="row">
+            <input class="input" id="loopTitle" value="My Fruit Loop" aria-label="Loop title">
+            <label class="btn" for="photoInput">Upload fruit drawing</label>
+          </div>
+          <input id="photoInput" type="file" accept="image/*" style="display:none">
+        </section>
 
-    <section class="panel">
-      <div class="presets">
-        <button class="preset active" data-preset="spin">Spin</button>
-        <button class="preset" data-preset="rain">Rain</button>
-        <button class="preset" data-preset="bounce">Bounce</button>
-        <button class="preset" data-preset="smash">Smash</button>
-        <button class="preset" data-preset="slingshot">Slingshot</button>
-        <button class="preset" data-preset="orbit">Orbit</button>
-      </div>
-    </section>
+        <section class="panel">
+          <div class="presets">
+            <button class="preset active" data-preset="spin">Spin</button>
+            <button class="preset" data-preset="rain">Rain</button>
+            <button class="preset" data-preset="bounce">Bounce</button>
+            <button class="preset" data-preset="smash">Smash</button>
+            <button class="preset" data-preset="slingshot">Slingshot</button>
+            <button class="preset" data-preset="orbit">Orbit</button>
+          </div>
+        </section>
 
-    <section class="panel">
-      <div class="preview" style="padding:0;">
-        <canvas class="draw-canvas" id="drawCanvas" width="960" height="540" aria-label="Draw your fruit"></canvas>
+        <section class="panel">
+          <div class="row">
+            <button class="btn primary" id="saveLoop">Add to Arrange</button>
+            <a class="btn" href="./index.html">Back to Arrange</a>
+          </div>
+        </section>
       </div>
-      <div class="swatches" id="swatches" aria-label="Drawing colors">
-        <button class="swatch active" data-color="#211527" style="background:#211527"></button>
-        <button class="swatch" data-color="#ff4fa3" style="background:#ff4fa3"></button>
-        <button class="swatch" data-color="#00d5ff" style="background:#00d5ff"></button>
-        <button class="swatch" data-color="#54f06b" style="background:#54f06b"></button>
-        <button class="swatch" data-color="#ffe03d" style="background:#ffe03d"></button>
-        <button class="swatch" data-color="#6267ff" style="background:#6267ff"></button>
-        <button class="swatch" data-color="#ff7a18" style="background:#ff7a18"></button>
-        <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
-      </div>
-      <div class="row" style="margin-top:10px;">
-        <button class="btn" id="clearDrawing" type="button">Clear drawing</button>
-        <button class="btn" id="useDrawing" type="button">Use drawing</button>
-      </div>
-      <p class="note">Or draw your own fruit directly.</p>
-    </section>
 
-    <section class="panel">
-      <div class="row">
-        <button class="btn primary" id="saveLoop">Add to Arrange</button>
-        <a class="btn" href="./index.html">Back to Arrange</a>
-      </div>
-    </section>
+      <div class="col">
+        <section class="panel">
+          <div class="preview" style="padding:0;">
+            <canvas class="draw-canvas" id="drawCanvas" width="960" height="540" aria-label="Draw your fruit"></canvas>
+          </div>
+          <div class="swatches" id="swatches" aria-label="Drawing colors">
+            <button class="swatch active" data-color="#211527" style="background:#211527"></button>
+            <button class="swatch" data-color="#ff4fa3" style="background:#ff4fa3"></button>
+            <button class="swatch" data-color="#00d5ff" style="background:#00d5ff"></button>
+            <button class="swatch" data-color="#54f06b" style="background:#54f06b"></button>
+            <button class="swatch" data-color="#ffe03d" style="background:#ffe03d"></button>
+            <button class="swatch" data-color="#6267ff" style="background:#6267ff"></button>
+            <button class="swatch" data-color="#ff7a18" style="background:#ff7a18"></button>
+            <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="clearDrawing" type="button">Clear drawing</button>
+            <button class="btn" id="useDrawing" type="button">Use drawing</button>
+          </div>
+          <p class="note">Or draw your own fruit directly.</p>
+        </section>
 
-    <section class="panel">
-      <div class="preview" id="preview"></div>
-      <p class="note" id="status">Upload an image to auto-detect and cut out the fruit.</p>
-    </section>
+        <section class="panel">
+          <div class="preview" id="preview"></div>
+          <p class="note" id="status">Upload an image to auto-detect and cut out the fruit.</p>
+        </section>
+      </div>
+    </div>
   </main>
 
   <script>
