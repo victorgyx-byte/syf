@@ -27,6 +27,10 @@
     .preset.active { outline: 3px solid rgba(0,213,255,.5); background: rgba(255,255,255,.85); }
     .preview { width: 100%; aspect-ratio: 16/9; border-radius: 18px; border: 1px solid var(--line); background: #fff; overflow: hidden; }
     .preview img { width: 100%; height: 100%; object-fit: cover; }
+    .draw-canvas { width: 100%; aspect-ratio: 16/9; border-radius: 18px; border: 1px solid var(--line); background: #fff; touch-action: none; display: block; }
+    .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 10px; }
+    .swatch { min-height: 30px; border-radius: 999px; border: 2px solid rgba(33,21,39,.2); }
+    .swatch.active { outline: 3px solid rgba(0,213,255,.45); }
     .note { margin: 0; font-size: .92rem; opacity: .8; }
     @media (max-width: 760px) { .row, .presets { grid-template-columns: 1fr; } }
   </style>
@@ -58,6 +62,27 @@
     </section>
 
     <section class="panel">
+      <div class="preview" style="padding:0;">
+        <canvas class="draw-canvas" id="drawCanvas" width="960" height="540" aria-label="Draw your fruit"></canvas>
+      </div>
+      <div class="swatches" id="swatches" aria-label="Drawing colors">
+        <button class="swatch active" data-color="#211527" style="background:#211527"></button>
+        <button class="swatch" data-color="#ff4fa3" style="background:#ff4fa3"></button>
+        <button class="swatch" data-color="#00d5ff" style="background:#00d5ff"></button>
+        <button class="swatch" data-color="#54f06b" style="background:#54f06b"></button>
+        <button class="swatch" data-color="#ffe03d" style="background:#ffe03d"></button>
+        <button class="swatch" data-color="#6267ff" style="background:#6267ff"></button>
+        <button class="swatch" data-color="#ff7a18" style="background:#ff7a18"></button>
+        <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="clearDrawing" type="button">Clear drawing</button>
+        <button class="btn" id="useDrawing" type="button">Use drawing</button>
+      </div>
+      <p class="note">Or draw your own fruit directly.</p>
+    </section>
+
+    <section class="panel">
       <div class="row">
         <button class="btn primary" id="saveLoop">Add to Arrange</button>
         <a class="btn" href="./index.html">Back to Arrange</a>
@@ -76,12 +101,88 @@
     const statusEl = document.getElementById("status");
     const titleEl = document.getElementById("loopTitle");
     const saveLoop = document.getElementById("saveLoop");
+    const drawCanvas = document.getElementById("drawCanvas");
+    const swatches = [...document.querySelectorAll(".swatch")];
+    const clearDrawing = document.getElementById("clearDrawing");
+    const useDrawing = document.getElementById("useDrawing");
     const presets = [...document.querySelectorAll(".preset")];
 
     let sourceImage = "";
     let sourceOriginal = "";
     let selectedPreset = "spin";
     let generatedSrc = "";
+    let drawing = false;
+
+    const drawCtx = drawCanvas.getContext("2d");
+    drawCtx.fillStyle = "#ffffff";
+    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawCtx.lineCap = "round";
+    drawCtx.lineJoin = "round";
+    drawCtx.strokeStyle = "#211527";
+    drawCtx.lineWidth = 8;
+
+    swatches.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        swatches.forEach((s) => s.classList.remove("active"));
+        btn.classList.add("active");
+        drawCtx.strokeStyle = btn.dataset.color;
+      });
+    });
+
+    function canvasPoint(event) {
+      const rect = drawCanvas.getBoundingClientRect();
+      const scaleX = drawCanvas.width / rect.width;
+      const scaleY = drawCanvas.height / rect.height;
+      return {
+        x: (event.clientX - rect.left) * scaleX,
+        y: (event.clientY - rect.top) * scaleY
+      };
+    }
+
+    drawCanvas.addEventListener("pointerdown", (event) => {
+      drawing = true;
+      const p = canvasPoint(event);
+      drawCtx.beginPath();
+      drawCtx.moveTo(p.x, p.y);
+      drawCanvas.setPointerCapture(event.pointerId);
+    });
+
+    drawCanvas.addEventListener("pointermove", (event) => {
+      if (!drawing) return;
+      const p = canvasPoint(event);
+      drawCtx.lineTo(p.x, p.y);
+      drawCtx.stroke();
+    });
+
+    function endDrawing() {
+      drawing = false;
+      drawCtx.closePath();
+    }
+
+    drawCanvas.addEventListener("pointerup", endDrawing);
+    drawCanvas.addEventListener("pointercancel", endDrawing);
+
+    clearDrawing.addEventListener("click", () => {
+      drawCtx.fillStyle = "#ffffff";
+      drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+      statusEl.textContent = "Drawing cleared.";
+    });
+
+    useDrawing.addEventListener("click", () => {
+      sourceOriginal = drawCanvas.toDataURL("image/png");
+      statusEl.textContent = "Using drawing. Detecting fruit and removing background...";
+      removeBackgroundAuto(sourceOriginal)
+        .then((cutout) => {
+          sourceImage = cutout;
+          updatePreview();
+          statusEl.textContent = "Drawing applied.";
+        })
+        .catch(() => {
+          sourceImage = sourceOriginal;
+          updatePreview();
+          statusEl.textContent = "Drawing applied (without auto-cut).";
+        });
+    });
 
     function makeLoopSvg(imageSrc, preset) {
       const style = {
