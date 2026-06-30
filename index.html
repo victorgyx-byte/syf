@@ -1687,6 +1687,13 @@
       if (tone === "ok" || tone === "error") syncStatus.classList.add(tone);
     }
 
+    function setExportStatus(message, tone = "neutral") {
+      if (!syncStatus) return;
+      syncStatus.textContent = `Export: ${message}`;
+      syncStatus.classList.remove("ok", "error");
+      if (tone === "ok" || tone === "error") syncStatus.classList.add(tone);
+    }
+
     function renderCards() {
       loopCards.innerHTML = "";
       musicCards.innerHTML = "";
@@ -2452,10 +2459,12 @@
     }
 
     function getExportApiUrl() {
-      let url = localStorage.getItem("cyj_export_api_url") || EXPORT_API_URL;
+      let url = EXPORT_API_URL || localStorage.getItem("cyj_export_api_url") || "";
       if (!url) {
         url = window.prompt("Paste your Google Cloud Run export URL");
         if (url) localStorage.setItem("cyj_export_api_url", url);
+      } else if (EXPORT_API_URL) {
+        localStorage.setItem("cyj_export_api_url", EXPORT_API_URL);
       }
       return String(url || "").replace(/\/+$/, "");
     }
@@ -2463,22 +2472,28 @@
     async function exportArrangementMp4() {
       if (!state.clips.length) {
         caption.textContent = "Add loops or music before exporting";
+        setExportStatus("add loops or music first", "error");
+        exportMp4.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: 260 });
         return;
       }
       const localClip = state.clips.find((clip) => String(clip.src || "").startsWith("blob:"));
       if (localClip) {
         caption.textContent = "Upload local files to the shared library before MP4 export";
+        setExportStatus("upload local files to shared library first", "error");
+        exportMp4.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: 260 });
         return;
       }
       const exportUrl = getExportApiUrl();
       if (!exportUrl) {
         caption.textContent = "Cloud Run export URL needed";
+        setExportStatus("Cloud Run URL needed", "error");
         return;
       }
       const payload = buildExportPayload();
       exportMp4.disabled = true;
-        exportMp4.textContent = "...";
+      exportMp4.textContent = "Exporting...";
       caption.textContent = "Rendering MP4...";
+      setExportStatus("rendering MP4...");
       try {
         const response = await fetch(`${exportUrl}/export`, {
           method: "POST",
@@ -2492,9 +2507,11 @@
         const blob = await response.blob();
         downloadBlob(blob, `create-your-jam-${Date.now()}.mp4`);
         caption.textContent = "MP4 ready";
+        setExportStatus("MP4 downloaded", "ok");
       } catch (error) {
         console.error("MP4 export failed:", error);
         caption.textContent = "MP4 export failed";
+        setExportStatus("failed - check Cloud Run", "error");
       } finally {
         exportMp4.disabled = false;
         exportMp4.textContent = "Export MP4";
