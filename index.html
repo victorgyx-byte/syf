@@ -1290,8 +1290,8 @@
       { title: "Apple Fury", note: "Squash-stretch 3D rush", duration: 2.9, kind: "visual", fileType: "svg", src: appleFurySrc, colors: ["#00d5ff", "#ff4fa3"], poster: "linear-gradient(135deg, #00d5ff, #ff4fa3 52%, #fff56a)" },
       { title: "Apple Slice Clone", note: "Sliced and duplicated loop", duration: 4.2, kind: "visual", fileType: "svg", src: appleSliceSrc, colors: ["#ffe03d", "#6267ff"], poster: "linear-gradient(135deg, #ffe03d, #6267ff 48%, #54f06b)" },
       { title: "Jumping Apple", note: "Line drawing bounce loop", duration: 3.6, kind: "visual", fileType: "svg", src: appleLoopSrc, colors: ["#ff4fa3", "#54f06b"], poster: "linear-gradient(135deg, #fff56a, #ff4fa3 50%, #00d5ff)" },
-      { title: "Rising Theme", note: "30s melody tension arc", duration: 30, kind: "audio", fileType: "synth", pattern: "rising", colors: ["#6267ff", "#54f06b"], poster: "linear-gradient(135deg, #6267ff, #54f06b 50%, #ffe03d)" },
-      { title: "Action Beat", note: "30s heavy action drums", duration: 30, kind: "audio", fileType: "synth", pattern: "action", colors: ["#211527", "#ff4fa3"], poster: "linear-gradient(135deg, #211527, #ff4fa3 52%, #ffe03d)" }
+      { title: "Rising Theme", note: "30s WAV melody tension arc", duration: 30, kind: "audio", fileType: "audio", src: "assets/audio/rising-theme-sample.wav", colors: ["#6267ff", "#54f06b"], poster: "linear-gradient(135deg, #6267ff, #54f06b 50%, #ffe03d)" },
+      { title: "Action Beat", note: "30s WAV heavy action drums", duration: 30, kind: "audio", fileType: "audio", src: "assets/audio/action-beat-sample.wav", colors: ["#211527", "#ff4fa3"], poster: "linear-gradient(135deg, #211527, #ff4fa3 52%, #ffe03d)" }
     ];
 
     const state = {
@@ -2426,6 +2426,10 @@
 
     function buildExportPayload() {
       const duration = Math.min(60, Math.max(1, ...state.clips.map((clip) => clip.start + clip.duration)));
+      const exportSrc = (src) => {
+        if (!src || src.startsWith("data:") || src.startsWith("blob:") || /^https?:\/\//i.test(src)) return src || "";
+        return new URL(src, window.location.href).href;
+      };
       return {
         title: "Create your jam",
         width: 640,
@@ -2439,7 +2443,7 @@
           kind: clip.kind,
           start: Math.max(0, Number(clip.start) || 0),
           duration: Math.max(1, Number(clip.duration) || 1),
-          src: clip.src || "",
+          src: exportSrc(clip.src),
           fileType: clip.fileType || "",
           pattern: clip.pattern || "",
           colors: Array.isArray(clip.colors) ? clip.colors.slice(0, 2) : colorPair(0)
@@ -2483,6 +2487,13 @@
         exportMp4.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: 260 });
         return;
       }
+      const audioClip = state.clips.find((clip) => clip.kind === "audio");
+      if (!audioClip) {
+        caption.textContent = "Add music before exporting MP4";
+        setExportStatus("add music to timeline first", "error");
+        exportMp4.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: 260 });
+        return;
+      }
       const exportUrl = getExportApiUrl();
       if (!exportUrl) {
         caption.textContent = "Cloud Run export URL needed";
@@ -2493,7 +2504,7 @@
       exportMp4.disabled = true;
       exportMp4.textContent = "Exporting...";
       caption.textContent = "Rendering MP4...";
-      setExportStatus("rendering MP4...");
+      setExportStatus(`rendering MP4 with ${audioClip.title || "music"}...`);
       try {
         const response = await fetch(`${exportUrl}/export`, {
           method: "POST",
