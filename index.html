@@ -461,7 +461,7 @@
       display: grid;
       width: 100%;
       min-height: 56px;
-      grid-template-columns: auto auto auto;
+      grid-template-columns: auto auto auto auto;
       place-items: center;
       gap: 7px;
       padding: 5px 8px;
@@ -585,6 +585,24 @@
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    .export-button {
+      min-width: 54px;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 999px;
+      background: rgba(255, 224, 61, .68);
+      box-shadow: 0 16px 36px rgba(49, 18, 84, .16);
+      color: var(--ink);
+      font-size: .78rem;
+      font-weight: 850;
+    }
+
+    .export-button:disabled {
+      opacity: .58;
+      cursor: progress;
     }
 
     .timeline-panel {
@@ -1070,6 +1088,7 @@
         <button class="icon-button" id="clearTimeline" aria-label="Clear all arrangement on timeline">
           <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 10v7"/><path d="M14 10v7"/></svg>
         </button>
+        <button class="export-button" id="exportMp4" type="button">Export MP4</button>
         <div class="sync-pill" id="syncStatus" aria-live="polite">Supabase: not connected</div>
       </section>
     </div>
@@ -1100,6 +1119,7 @@
     const SUPABASE_BUCKET = "media-assets";
     const SUPABASE_TABLE = "media_library";
     const ARRANGEMENT_STORAGE_KEY = "cyj_arrangement_v2";
+    const EXPORT_API_URL = "https://create-your-jam-exporter-56688561965.asia-southeast1.run.app";
     let supabaseClient = null;
     let saveTimer = null;
 
@@ -1314,6 +1334,7 @@
     const stageMedia = document.getElementById("stageMedia");
     const loopUpload = document.getElementById("loopUpload");
     const musicUpload = document.getElementById("musicUpload");
+    const exportMp4 = document.getElementById("exportMp4");
     const audioPlayer = new Audio();
     const basePx = 74;
     const snapSeconds = .5;
@@ -2395,6 +2416,92 @@
       caption.textContent = "Generated loops cleared";
       pulse(loopCards);
     });
+
+    function buildExportPayload() {
+      const duration = Math.min(60, Math.max(1, ...state.clips.map((clip) => clip.start + clip.duration)));
+      return {
+        title: "Create your jam",
+        width: 640,
+        height: 360,
+        fps: 12,
+        duration,
+        background: "#f7f3ff",
+        clips: state.clips.map((clip) => ({
+          id: clip.id,
+          title: clip.title,
+          kind: clip.kind,
+          start: Math.max(0, Number(clip.start) || 0),
+          duration: Math.max(1, Number(clip.duration) || 1),
+          src: clip.src || "",
+          fileType: clip.fileType || "",
+          pattern: clip.pattern || "",
+          colors: Array.isArray(clip.colors) ? clip.colors.slice(0, 2) : colorPair(0)
+        }))
+      };
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function getExportApiUrl() {
+      let url = localStorage.getItem("cyj_export_api_url") || EXPORT_API_URL;
+      if (!url) {
+        url = window.prompt("Paste your Google Cloud Run export URL");
+        if (url) localStorage.setItem("cyj_export_api_url", url);
+      }
+      return String(url || "").replace(/\/+$/, "");
+    }
+
+    async function exportArrangementMp4() {
+      if (!state.clips.length) {
+        caption.textContent = "Add loops or music before exporting";
+        return;
+      }
+      const localClip = state.clips.find((clip) => String(clip.src || "").startsWith("blob:"));
+      if (localClip) {
+        caption.textContent = "Upload local files to the shared library before MP4 export";
+        return;
+      }
+      const exportUrl = getExportApiUrl();
+      if (!exportUrl) {
+        caption.textContent = "Cloud Run export URL needed";
+        return;
+      }
+      const payload = buildExportPayload();
+      exportMp4.disabled = true;
+        exportMp4.textContent = "...";
+      caption.textContent = "Rendering MP4...";
+      try {
+        const response = await fetch(`${exportUrl}/export`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(message || `Export failed with ${response.status}`);
+        }
+        const blob = await response.blob();
+        downloadBlob(blob, `create-your-jam-${Date.now()}.mp4`);
+        caption.textContent = "MP4 ready";
+      } catch (error) {
+        console.error("MP4 export failed:", error);
+        caption.textContent = "MP4 export failed";
+      } finally {
+        exportMp4.disabled = false;
+        exportMp4.textContent = "Export MP4";
+      }
+    }
+
+    exportMp4.addEventListener("click", exportArrangementMp4);
 
     function tick(now) {
       if (!state.playing) return;
